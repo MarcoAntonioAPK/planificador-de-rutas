@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Accede a RouteFlow.">
+    <title>Iniciar sesión | RouteFlow</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/app.css">
+    <link rel="stylesheet" href="assets/css/login.css">
+</head>
+<body class="auth-page">
+    <main class="auth-shell">
+        <a class="brand auth-brand" href="index.html"><span class="brand-mark"><i class="fa-solid fa-route"></i></span><strong>RouteFlow</strong></a>
+        <section class="auth-card" aria-labelledby="login-title">
+            <div class="auth-heading"><h1 id="login-title">Bienvenido</h1><p>Accede para gestionar tus rutas guardadas.</p></div>
+            <form id="loginForm">
+                <div class="auth-field"><label for="email">Correo electrónico</label><input id="email" name="email" type="email" autocomplete="email" placeholder="nombre@empresa.com" required></div>
+                <div class="auth-field"><div class="label-row"><label for="password">Contraseña</label><a href="#">¿La olvidaste?</a></div><div class="password-shell"><input id="password" name="password" type="password" autocomplete="current-password" placeholder="Tu contraseña" required><button id="togglePassword" type="button" aria-label="Mostrar contraseña"><i class="fa-regular fa-eye"></i></button></div></div>
+                <p class="form-message" id="loginMessage" role="alert" aria-live="polite"></p>
+                <button class="primary-button auth-submit" type="submit"><span>Iniciar sesión</span><i class="fa-solid fa-arrow-right"></i></button>
+            </form>
+            <p class="auth-footer">¿Todavía no tienes acceso? <a href="mailto:admin@routeflow.local">Contacta con tu administrador</a></p>
+        </section>
+        <small class="auth-legal">© 2026 RouteFlow · Operaciones seguras</small>
+    </main>
+    <script src="assets/js/login.js" defer></script>
+</body>
+</html>
