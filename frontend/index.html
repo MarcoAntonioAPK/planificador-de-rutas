@@ -1,127 +1,141 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Transporte de Carga</title>
-    
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- Font Awesome Icons -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Planifica rutas de transporte y evita áreas restringidas.">
+    <title>RouteFlow | Planificador de rutas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="base.css">
+    <link rel="stylesheet" href="https://js.api.here.com/v3/3.1/mapsjs-ui.css">
+    <link rel="stylesheet" href="assets/css/app.css">
+</head>
+<body>
+    <header class="app-header">
+        <a class="brand" href="#" aria-label="RouteFlow, inicio">
+            <span class="brand-mark" aria-hidden="true"><i class="fa-solid fa-route"></i></span>
+            <span>
+                <strong>RouteFlow</strong>
+                <small>Logística inteligente</small>
+            </span>
+        </a>
+
+        <div class="header-context" aria-label="Contexto de operación">
+            <span class="live-dot" aria-hidden="true"></span>
+            <span>Centro de operaciones</span>
+            <span class="context-divider"></span>
+            <span class="muted">Madrid, ES</span>
+        </div>
+
+        <div class="header-actions">
+            <button class="icon-button mobile-menu" id="sidebarToggle" type="button" aria-label="Mostrar panel de planificación" aria-controls="sidebar" aria-expanded="false">
+                <i class="fa-solid fa-sliders"></i>
+            </button>
+            <button class="secondary-button" id="saveRouteBtn" type="button">
+                <i class="fa-regular fa-bookmark"></i><span>Guardar</span>
+            </button>
+            <button class="avatar-button" type="button" aria-label="Perfil de usuario">LM</button>
+        </div>
+    </header>
+
+    <main class="workspace">
+        <aside class="planner-panel" id="sidebar" aria-label="Configuración de la ruta">
+            <div class="panel-heading">
+                <div>
+                    <span class="eyebrow">Nueva planificación</span>
+                    <h1>Diseña tu ruta</h1>
+                    <p>Define el trayecto y marca en el mapa las zonas que tu flota debe evitar.</p>
+                </div>
+                <span class="step-pill">Paso 1 de 2</span>
+            </div>
+
+            <form id="routeForm" novalidate>
+                <section class="form-section" aria-labelledby="route-points-title">
+                    <div class="section-heading">
+                        <span class="section-icon"><i class="fa-solid fa-location-dot"></i></span>
+                        <div><h2 id="route-points-title">Puntos de ruta</h2><p>Coordenadas en formato latitud, longitud</p></div>
+                    </div>
+
+                    <div class="route-inputs">
+                        <div class="field-group route-point route-point--origin">
+                            <label for="origenCoords">Origen</label>
+                            <div class="input-shell">
+                                <span class="point-marker"></span>
+                                <input type="text" id="origenCoords" value="40.4168, -3.7038" inputmode="decimal" autocomplete="off" aria-describedby="originHint">
+                                <button class="input-action" type="button" data-use-location="origenCoords" aria-label="Usar mi ubicación como origen"><i class="fa-solid fa-crosshairs"></i></button>
+                            </div>
+                            <small id="originHint">Madrid · Puerta del Sol</small>
+                        </div>
+
+                        <div class="route-connector" aria-hidden="true"><span></span></div>
+
+                        <div class="field-group route-point route-point--destination">
+                            <label for="destinoCoords">Destino</label>
+                            <div class="input-shell">
+                                <span class="point-marker"></span>
+                                <input type="text" id="destinoCoords" value="40.4379, -3.6795" inputmode="decimal" autocomplete="off" aria-describedby="destinationHint">
+                                <button class="input-action" type="button" data-use-location="destinoCoords" aria-label="Usar mi ubicación como destino"><i class="fa-solid fa-crosshairs"></i></button>
+                            </div>
+                            <small id="destinationHint">Madrid · El Viso</small>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="form-section" aria-labelledby="restrictions-title">
+                    <div class="section-heading section-heading--split">
+                        <div class="section-heading-copy">
+                            <span class="section-icon section-icon--amber"><i class="fa-solid fa-draw-polygon"></i></span>
+                            <div><h2 id="restrictions-title">Áreas restringidas</h2><p>Haz 3 clics sobre el mapa por cada área</p></div>
+                        </div>
+                        <span class="count-badge" id="areaCount">0 áreas</span>
+                    </div>
+                    <div class="instruction-card">
+                        <span class="instruction-number">3</span>
+                        <p><strong>Puntos para delimitar</strong><br>Los vértices se conectarán automáticamente.</p>
+                        <i class="fa-solid fa-arrow-pointer" aria-hidden="true"></i>
+                    </div>
+                    <button class="text-button" id="clearAreasBtn" type="button" disabled><i class="fa-regular fa-trash-can"></i> Limpiar áreas marcadas</button>
+                </section>
+
+                <div class="form-actions">
+                    <button class="primary-button" id="calculateRouteBtn" type="submit">
+                        <span>Calcular ruta óptima</span><i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                    <button class="secondary-button secondary-button--wide" id="recalculateRouteBtn" type="button">
+                        <i class="fa-solid fa-shuffle"></i><span>Evitar áreas y recalcular</span>
+                    </button>
+                </div>
+            </form>
+
+            <div class="panel-footer"><i class="fa-solid fa-shield-halved"></i><span>Rutas optimizadas para vehículos pesados</span></div>
+        </aside>
+
+        <section class="map-stage" aria-label="Mapa de planificación">
+            <div id="map" role="application" aria-label="Mapa interactivo de la ruta"></div>
+            <div class="map-topbar">
+                <div class="map-status"><span class="live-dot"></span><span>Mapa en tiempo real</span></div>
+                <button class="map-control-button" id="fitMapBtn" type="button" aria-label="Centrar ruta"><i class="fa-solid fa-expand"></i></button>
+            </div>
+
+            <div class="route-summary" id="routeSummary" aria-live="polite">
+                <div class="summary-icon"><i class="fa-solid fa-truck-fast"></i></div>
+                <div class="summary-copy"><span>Ruta preparada</span><strong id="routeDistance">Calcula un trayecto para ver el resumen</strong></div>
+                <div class="summary-stat"><span>Tiempo estimado</span><strong id="routeDuration">—</strong></div>
+                <span class="summary-divider"></span>
+                <div class="summary-stat"><span>Estado</span><strong class="status-ok" id="routeStatus">Lista</strong></div>
+            </div>
+
+            <div class="toast" id="appToast" role="status" aria-live="polite"><i class="fa-solid fa-circle-check"></i><span></span></div>
+        </section>
+    </main>
 
     <script src="https://js.api.here.com/v3/3.1/mapsjs-core.js"></script>
     <script src="https://js.api.here.com/v3/3.1/mapsjs-service.js"></script>
     <script src="https://js.api.here.com/v3/3.1/mapsjs-ui.js"></script>
     <script src="https://js.api.here.com/v3/3.1/mapsjs-mapevents.js"></script>
-    <link rel="stylesheet" href="https://js.api.here.com/v3/3.1/mapsjs-ui.css" />
-</head>
-<body>
-    <!-- Header -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
-        <div class="container-fluid">
-            <button class="btn btn-link sidebar-toggle me-3" id="sidebarToggle">
-                <i class="fas fa-bars text-primary"></i>
-            </button>
-            <a class="navbar-brand fw-bold text-primary" href="#">
-                <i class="fas fa-truck me-2"></i>
-                Planificador de rutas
-            </a>
-            <div class="ms-auto">
-                <button class="btn btn-outline-primary btn-sm me-2" id="saveRouteBtn">
-                    <i class="fas fa-save me-1"></i>
-                    Guardar área reinstringida
-                </button>
-                <button class="btn btn-primary btn-sm" id="generatePdfBtn">
-                    <i class="fas fa-file-pdf me-1"></i>
-                    Generar PDF
-                </button>
-            </div>
-        </div>
-    </nav>
-
-    <div class="main-container">
-        <!-- Sidebar -->
-        <div class="sidebar" id="sidebar">
-            <div class="sidebar-content">
-                <div class="card glass-card">
-                    <div class="card-header bg-transparent border-0">
-                        <h5 class="card-title text-primary mb-0">
-                            <i class="fas fa-route me-2"></i>
-                            Planificación de Ruta
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div id="routeForm">
-                            <!-- Nuevos inputs para coordenadas -->
-                            <div class="form-section">
-                                <h6 class="section-title">
-                                    <i class="fas fa-map-marker-alt me-2"></i>
-                                    Coordenadas de Ruta
-                                </h6>
-                                <div class="mb-3">
-                                    <label for="origenCoords" class="form-label">Origen (lat, lng)</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text bg-light">
-                                            <i class="fas fa-play text-success"></i>
-                                        </span>
-                                        <input type="text" class="form-control" id="origenCoords" 
-                                               placeholder="40.4168, -3.7038" value="40.4168, -3.7038">
-                                    </div>
-                                    <small class="form-text text-muted">Formato: latitud, longitud</small>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="destinoCoords" class="form-label">Destino (lat, lng)</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text bg-light">
-                                            <i class="fas fa-flag text-danger"></i>
-                                        </span>
-                                        <input type="text" class="form-control" id="destinoCoords" 
-                                               placeholder="40.4379, -3.6795" value="40.4379, -3.6795">
-                                    </div>
-                                    <small class="form-text text-muted">Formato: latitud, longitud</small>
-                                </div>
-                            </div>
-
-                            <!-- Botones de Acción -->
-                            <div class="form-actions">
-                                <button class="btn btn-primary w-100 mb-2" onclick="calcularRuta(false)">
-                                    <i class="fas fa-route me-2"></i>
-                                    Calcular ruta propuesta
-                                </button>
-                                <button class="btn btn-primary w-100 mb-2" onclick="calcularRuta(true)">
-                                    <i class="fas fa-route me-2"></i>
-                                    Recalcular ruta
-                                </button>
-                                <button class="btn btn-outline-secondary w-100" onclick="borrarTriangulos()">
-                                    <i class="fas fa-eraser me-2"></i>
-                                    Borrar áreas reinstringidas
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Map Container -->
-        <div class="map-container" id="mapContainer">
-            <div id="contenedo_mapa"></div>
-        </div>
-    </div>
-
-    <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    
-    <script src="animacion.js"></script>
-    <script src="mapa.js"></script>
+    <script src="assets/js/ui.js" defer></script>
+    <script src="assets/js/map.js" defer></script>
 </body>
 </html>

@@ -25,13 +25,19 @@ Abre <http://localhost:8000>.
 | Archivo | Responsabilidad |
 | --- | --- |
 | `index.html` | Estructura de la pantalla y carga de dependencias. |
-| `base.css` | Tema, layout adaptable y estilos visuales. |
-| `animacion.js` | Comportamiento general de la interfaz. |
-| `mapa.js` | Inicialización de HERE Maps, áreas restringidas y rutas. |
+| `assets/css/app.css` | Sistema visual, layout adaptable y componentes. |
+| `assets/js/ui.js` | Interacciones de interfaz, panel móvil y notificaciones. |
+| `assets/js/map.js` | HERE Maps, validación, áreas restringidas y cálculo de rutas. |
+
+La separación por tipo de recurso mantiene el documento HTML libre de estilos y
+lógica inline. Los módulos JavaScript se reparten por responsabilidad para que
+las próximas integraciones no conviertan el mapa en un archivo de interfaz
+generalista.
 
 ## Configuración
 
-La implementación heredada contiene la configuración de HERE en `mapa.js`.
+La implementación heredada contiene la configuración de HERE en
+`assets/js/map.js`.
 Antes de publicar o ampliar la aplicación se debe rotar esa credencial y
 extraerla a configuración de despliegue. No deben añadirse más secretos al
 repositorio.
@@ -52,4 +58,3 @@ los orígenes permitidos en Django.
 
 No se debe acoplar esta evolución a plantillas Django: el backend entregará una
 API y el frontend conservará su ciclo de vida independiente.
-

@@ -19,9 +19,11 @@ queda expresamente fuera del alcance de este repositorio.
 │   ├── AGENTS.md      # Reglas específicas del frontend
 │   ├── README.md      # Puesta en marcha y arquitectura del frontend
 │   ├── index.html
-│   ├── base.css
-│   ├── animacion.js
-│   └── mapa.js
+│   └── assets/
+│       ├── css/app.css
+│       └── js/
+│           ├── ui.js
+│           └── map.js
 └── backend/           # Espacio preparado para la futura API Django
     ├── AGENTS.md      # Reglas específicas de Django/API
     └── README.md      # Diseño y plan de incorporación del backend
@@ -74,4 +76,3 @@ documentación y pruebas de integración del consumidor frontend.
 3. Ejecuta las comprobaciones descritas en su README.
 4. Si se modifica el contrato HTTP, actualiza ambos README y sus pruebas.
 5. Entrega un commit autocontenido, sin secretos ni artefactos generados.
-
