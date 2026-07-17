@@ -3,6 +3,9 @@
 .env.*
 !.env.example
 
+# Notas
+notas.txt
+
 # Python / Django
 __pycache__/
 *.py[cod]
