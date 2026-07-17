@@ -2,18 +2,22 @@ import json
 from django.test import Client, TestCase
 from django.urls import reverse
 
-from apps.users.models import User
+from apps.operations.models import Company, Membership
+from apps.users.models import Role, User
 
 
 class AuthenticationTests(TestCase):
     def setUp(self):
-        self.user = User.objects.create_user(email="planner@example.com", password="safe-password-123", name="Laura")
+        self.role = Role.objects.get(code=Role.Code.PLANNER)
+        self.company = Company.objects.create(name="Prueba", slug="prueba")
+        self.user = User.objects.create_user(email="planner@example.com", password="safe-password-123", name="Laura", phone="5551234567")
+        Membership.objects.create(company=self.company, user=self.user, role=self.role)
         self.client = Client(enforce_csrf_checks=True)
 
     def test_user_uses_email_as_identifier(self):
         self.assertEqual(self.user.email, "planner@example.com")
         self.assertEqual(self.user.USERNAME_FIELD, "email")
-        self.assertEqual(self.user.role, User.Role.PLANNER)
+        self.assertEqual(self.user.memberships.get().role.code, Role.Code.PLANNER)
 
     def test_login_requires_csrf_and_returns_safe_profile(self):
         csrf_response = self.client.get(reverse("users:csrf"))
@@ -27,6 +31,7 @@ class AuthenticationTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["user"]["email"], self.user.email)
         self.assertNotIn("password", response.json()["user"])
+        self.assertEqual(response.json()["user"]["memberships"][0]["company"], "Prueba")
 
     def test_login_rejects_invalid_credentials(self):
         token = self.client.get(reverse("users:csrf")).json()["csrfToken"]

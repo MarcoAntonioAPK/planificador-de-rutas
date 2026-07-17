@@ -1,16 +1,8 @@
-# Backend
+# Backend de Planificador de rutas
 
-API Django de RouteFlow. El primer dominio implementado es la autenticación de
-usuarios mediante sesiones seguras y correo electrónico.
+API Django/PostgreSQL multiempresa para usuarios, flota, zonas restringidas y rutas. Django `5.2.7`, `django-cors-headers 4.7.0` y `psycopg 3.2.10` están fijados en `requirements.txt`; no es necesario instalar Vue ni Tailwind.
 
-## Versiones
-
-El manifiesto fija Django `5.2.7`, la versión de compatibilidad tomada como base
-para mantener el backend alineado con gym-erp, y `django-cors-headers 4.7.0`.
-Si gym-erp actualiza su versión, ambos proyectos deben actualizarse juntos y
-pasar sus pruebas antes de desplegarse.
-
-## Instalación
+## Instalación y migraciones
 
 ```bash
 cd backend
@@ -19,43 +11,54 @@ python3 -m venv .venv
 pip install -r requirements.txt
 cp .env.example .env
 set -a && source .env && set +a
+python manage.py makemigrations --check --dry-run
 python manage.py migrate
 python manage.py createsuperuser
 python manage.py runserver 8001
 ```
 
-El frontend se sirve en `http://localhost:8000` y utiliza por defecto la API en
-`http://localhost:8001/api/v1`. En otro entorno se debe definir
-`window.ROUTEFLOW_API_URL` antes de cargar `assets/js/login.js`.
+Nunca guardes `.env`. Para datos de prueba, después de migrar:
 
-La guía detallada para generar `DJANGO_SECRET_KEY`, conectar PostgreSQL desde
-Django y DBeaver, y trabajar con migraciones está en
-[`docs/database.md`](docs/database.md).
-
-## Estructura
-
-```text
-backend/
-├── config/              # settings, URLs y WSGI
-├── apps/users/          # usuario, administrador y endpoints de sesión
-├── manage.py
-└── requirements.txt
+```bash
+psql "$DATABASE_URL" -f scripts/demo_data.sql
+# o: psql -h "$DB_HOST" -U "$DB_USER" -d "$DB_NAME" -f scripts/demo_data.sql
 ```
 
-## Autenticación
+El script crea Salzillo y Transportes, sus administradores, dos planificadores y dos choferes **por empresa**, un tipo de tractocamión y el grupo/zona Chihuahua. Todas las cuentas incluidas usan `Temporal2026.` y deben cambiarla tras el primer acceso.
 
-El modelo `users.User` usa el correo único como identificador e incorpora nombre
-y rol (`admin`, `planner` o `driver`). `AUTH_USER_MODEL` se configuró desde la
-primera migración para permitir su evolución sin sustituir tablas posteriormente.
+## Modelo y aislamiento
 
-| Método | Ruta | Descripción |
-| --- | --- | --- |
-| `GET` | `/api/v1/auth/csrf/` | Entrega el token CSRF y prepara su cookie. |
-| `POST` | `/api/v1/auth/login/` | Abre una sesión con `email` y `password`. |
-| `POST` | `/api/v1/auth/logout/` | Cierra la sesión actual. |
+- `users.Role` es el catálogo ligado a `operations.Membership`: SuperAdmin, Admin, Planificador y Chofer.
+- `Company` guarda su paleta (`primary_color`, `secondary_color`, `accent_color`) y logo.
+- `Membership` liga usuario, empresa y rol; `supervisor` permite que un planificador agrupe choferes. Un usuario puede tener membresías independientes.
+- `TruckType` guarda dimensiones, peso, ejes y remolques.
+- `RestrictedZoneGroup` agrupa `RestrictedZone`; cada polígono se conserva como GeoJSON.
+- `PlannedRoute` pertenece a una empresa, planificador, chofer opcional y tipo de tráiler. Conserva carga, salida, geometría y la solicitud preparada para HERE.
 
-Las peticiones de escritura requieren `X-CSRFToken`; las cookies son HTTP-only
-y CORS solo acepta los orígenes indicados en `DJANGO_CORS_ALLOWED_ORIGINS`.
+Los endpoints filtran por membresía. SuperAdmin puede administrar todas las empresas; Admin solo su empresa; Planificador sus rutas y catálogos; Chofer solo sus asignaciones.
+
+## API `/api/v1/`
+
+| Método | Ruta | Acceso |
+|---|---|---|
+| POST | `auth/register/` | Registro como `planner` o `driver` ligado a empresa |
+| POST | `auth/login/`, `auth/logout/` | Sesión |
+| GET | `auth/me/` | Perfil, membresías y tema |
+| POST | `auth/password-reset/` | Correo de recuperación sin revelar si existe |
+| GET/POST | `companies/` | Listado / alta por SuperAdmin |
+| GET/POST | `companies/{id}/members/` | Admin y SuperAdmin |
+| GET/POST | `companies/{id}/truck-types/` | Catálogo de unidades |
+| GET/POST | `companies/{id}/restricted-zones/` | Grupos y polígonos |
+| GET/POST | `companies/{id}/routes/` | Rutas filtradas por perfil |
+| GET | `routes/{id}/` | Detalle imprimible/exportable |
+
+Las escrituras usan sesión y `X-CSRFToken`, obtenido en `auth/csrf/`.
+
+## HERE Routing API v8
+
+La solicitud usa `transportMode=truck`, hora de salida y restricciones físicas (`vehicle[height]`, `width`, `length`, `grossWeight`, `axleCount`, `trailerCount`). Las zonas se traducen a `avoid[areas]`. El tipo y peso de mercancía se conservan como contexto interno: un texto libre de mercancía **no es un parámetro de Routing v8** y no debe enviarse como si lo fuera. Para mercancías peligrosas se debe ampliar el formulario con la clasificación admitida por HERE y mapearla a `truck[shippedHazardousGoods]`; el peso real debe contribuir al peso bruto del vehículo.
+
+Referencia: [HERE Routing API documentation](https://www.here.com/docs/bundle/routing-api-v8-api-reference/page/index.html).
 
 ## Comprobaciones
 

@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Planifica rutas de transporte y evita áreas restringidas.">
-    <title>RouteFlow | Planificador de rutas</title>
+    <title>Planificador de rutas</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -14,9 +14,9 @@
 </head>
 <body>
     <header class="app-header">
-        <a class="brand" href="index.html" aria-label="RouteFlow, inicio">
+        <a class="brand" href="index.html" aria-label="Planificador de rutas, inicio">
             <span class="brand-mark" aria-hidden="true"><i class="fa-solid fa-route"></i></span>
-            <strong>RouteFlow</strong>
+            <strong>Planificador de rutas</strong>
         </a>
         <div class="header-actions">
             <span class="connection-status"><span class="live-dot"></span> En línea</span>
@@ -51,12 +51,21 @@
 
                 <section class="form-section" aria-labelledby="restrictions-title">
                     <div class="section-row"><div><h2 id="restrictions-title">Zonas a evitar</h2><p>Selecciona tres puntos en el mapa.</p></div><span class="count-badge" id="areaCount">0 áreas</span></div>
-                    <button class="text-button" id="clearAreasBtn" type="button" disabled><i class="fa-regular fa-trash-can"></i> Limpiar selección</button>
+                    <button class="text-button" id="clearAreasBtn" type="button" disabled><i class="fa-regular fa-trash-can"></i> Limpiar selección</button><div class="inline-actions"><button class="text-button" id="saveZoneBtn" type="button"><i class="fa-regular fa-bookmark"></i> Guardar en grupo</button><button class="text-button neutral" id="toggleZonesBtn" type="button"><i class="fa-regular fa-eye"></i> Ver zonas guardadas</button></div>
+                </section>
+
+                <section class="form-section" aria-labelledby="load-title">
+                    <div class="section-row"><h2 id="load-title">Unidad y carga</h2><button class="small-button" id="newTruckBtn" type="button">+ Tráiler</button></div>
+                    <div class="field-group"><label for="truckType">Tipo de tráiler</label><select id="truckType" required><option value="">Selecciona una unidad</option><option>Caja seca 53 pies · 5 ejes</option><option>Plataforma · 5 ejes</option></select></div>
+                    <div class="field-group"><label for="cargoType">Tipo de mercancía</label><input id="cargoType" type="text" placeholder="Ej. alimento no perecedero" required></div>
+                    <div class="form-grid"><div class="field-group"><label for="cargoWeight">Carga (kg)</label><input id="cargoWeight" type="number" min="1" value="18000" required></div><div class="field-group"><label for="departureAt">Salida</label><input id="departureAt" type="datetime-local" required></div></div>
+                    <div class="field-group"><label for="driver">Asignar a chofer</label><select id="driver"><option value="">Sin asignar (borrador)</option><option>José Ríos</option><option>Mario Cruz</option></select></div>
                 </section>
 
                 <div class="form-actions">
                     <button class="primary-button" id="calculateRouteBtn" type="submit"><span>Calcular ruta</span><i class="fa-solid fa-arrow-right"></i></button>
                     <button class="secondary-button" id="recalculateRouteBtn" type="button"><i class="fa-solid fa-shuffle"></i><span>Evitar zonas</span></button>
+                    <button class="secondary-button" id="exportPdfBtn" type="button"><i class="fa-regular fa-file-pdf"></i><span>Exportar PDF</span></button>
                 </div>
             </form>
         </aside>
@@ -74,6 +83,10 @@
         </section>
     </main>
 
+    <dialog id="truckDialog"><form method="dialog" class="dialog-form"><div class="dialog-heading"><div><span class="eyebrow">Catálogo</span><h2>Nuevo tipo de tráiler</h2></div><button class="icon-button" value="cancel" aria-label="Cerrar">×</button></div><label>Nombre<input name="name" required placeholder="Caja refrigerada 53 pies"></label><div class="form-grid"><label>Alto (cm)<input name="height" type="number" required></label><label>Ancho (cm)<input name="width" type="number" required></label><label>Largo (cm)<input name="length" type="number" required></label><label>Peso bruto (kg)<input name="weight" type="number" required></label><label>Ejes<input name="axles" type="number" min="2" max="12" required></label><label>Remolques<input name="trailers" type="number" min="0" max="3" value="1" required></label></div><button class="primary-button" value="save">Guardar tipo de tráiler</button></form></dialog>
+    <dialog id="zoneDialog"><form method="dialog" class="dialog-form"><div class="dialog-heading"><div><span class="eyebrow">Restricciones</span><h2>Guardar zona</h2></div><button class="icon-button" value="cancel" aria-label="Cerrar">×</button></div><label>Nombre de la zona<input required placeholder="Acceso restringido del centro"></label><label>Grupo<select><option>Chihuahua</option><option value="new">+ Crear nuevo grupo</option></select></label><button class="primary-button" value="save">Guardar 3 puntos</button></form></dialog>
+
+    <script src="config.js"></script>
     <script src="https://js.api.here.com/v3/3.1/mapsjs-core.js"></script><script src="https://js.api.here.com/v3/3.1/mapsjs-service.js"></script><script src="https://js.api.here.com/v3/3.1/mapsjs-ui.js"></script><script src="https://js.api.here.com/v3/3.1/mapsjs-mapevents.js"></script>
     <script src="assets/js/ui.js" defer></script><script src="assets/js/map.js" defer></script>
 </body>

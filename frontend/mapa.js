@@ -1,4 +1,4 @@
-const API_KEY = 'o6fAtTiki_UKCCGjq4sBaymk6Ifs7EtwO7ABymZKt2E';
+const API_KEY = window.PLANIFICADOR_CONFIG?.hereApiKey;
 const platform = new H.service.Platform({ apikey: API_KEY });
 const map = new H.Map(document.getElementById('contenedo_mapa'),
     platform.createDefaultLayers().vector.normal.map,
