@@ -1,7 +1,7 @@
 (() => {
     "use strict";
 
-    const HERE_API_KEY = "o6fAtTiki_UKCCGjq4sBaymk6Ifs7EtwO7ABymZKt2E";
+    const HERE_API_KEY = window.PLANIFICADOR_CONFIG?.hereApiKey;
     const areaCount = document.querySelector("#areaCount");
     const clearAreasButton = document.querySelector("#clearAreasBtn");
     const routeForm = document.querySelector("#routeForm");
@@ -27,9 +27,9 @@
     }
 
     function initializeMap() {
-        if (!window.H) {
+        if (!window.H || !HERE_API_KEY) {
             mapElement.classList.add("map-unavailable");
-            mapElement.innerHTML = '<div class="map-error"><i class="fa-solid fa-map"></i><strong>Mapa no disponible</strong><span>Comprueba la conexión con HERE Maps.</span></div>';
+            mapElement.innerHTML = '<div class="map-error"><i class="fa-solid fa-map"></i><strong>Mapa no disponible</strong><span>Configura la credencial de HERE Maps para este entorno.</span></div>';
             notify("No se pudo cargar el proveedor cartográfico.", "error");
             return;
         }
@@ -143,12 +143,12 @@
                 origin: `${origin.lat},${origin.lng}`,
                 destination: `${destination.lat},${destination.lng}`,
                 return: "polyline,summary",
-                "truck[height]": 280,
-                "truck[width]": 260,
-                "truck[length]": 1600,
-                "truck[grossWeight]": 61730,
-                "truck[weightPerAxle]": 61730,
-                "truck[tunnelCategory]": "B"
+                "vehicle[height]": 410,
+                "vehicle[width]": 260,
+                "vehicle[length]": 2100,
+                "vehicle[grossWeight]": Number(document.querySelector("#cargoWeight").value) + 18000,
+                "vehicle[axleCount]": 5,
+                departureTime: new Date(document.querySelector("#departureAt").value).toISOString()
             };
 
             if (avoidRestrictedAreas && inflatedAreas.length > 0) {

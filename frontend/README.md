@@ -1,63 +1,97 @@
-# Frontend
+# Frontend de Planificador de rutas
 
-Interfaz web actual del planificador de rutas. Es una aplicación estática que
-utiliza Bootstrap, Font Awesome, jQuery y HERE Maps desde CDN.
+Aplicación estática, minimalista y adaptable. No requiere Vue 3, Node ni Tailwind: la paleta multiempresa se aplica con tokens CSS (`--primary`, `--secondary`, `--accent`) recibidos por `/api/v1/auth/me/`.
 
-## Requisitos
+## Ejecutar con Go Live (VS Code)
 
-- Un navegador moderno.
-- Python 3 (solo para el servidor HTTP local del ejemplo) o cualquier servidor
-  de archivos estáticos.
-- Acceso a internet para cargar las dependencias CDN y los servicios de HERE.
+Go Live **solo sirve los archivos del frontend**. No inicia Django ni conecta
+automáticamente las dos aplicaciones. Debes mantener el backend activo en otra
+terminal.
 
-## Ejecución local
+1. Crea la configuración local del frontend desde la raíz del repositorio:
 
-Desde la raíz del repositorio:
+```bash
+cp frontend/config.example.js frontend/config.js
+```
+
+2. Abre `frontend/config.js` y conserva `apiUrl` apuntando al backend:
+
+```js
+window.PLANIFICADOR_CONFIG = {
+    hereApiKey: "TU_API_KEY_DE_HERE",
+    apiUrl: "http://localhost:8001/api/v1"
+};
+```
+
+3. En VS Code abre `frontend/login.html`, pulsa **Go Live** y visita normalmente
+   <http://localhost:5500/frontend/login.html>. Si abriste `frontend/` como la
+   carpeta raíz de VS Code, la URL será <http://localhost:5500/login.html>.
+
+Como alternativa a Go Live:
+
+```bash
+python3 -m http.server 5500 --directory frontend
+```
+
+`config.js` está ignorado por Git y nunca debe publicarse con credenciales sin
+las restricciones de dominio correspondientes.
+
+## Iniciar el backend
+
+En una segunda terminal, después de instalar y configurar PostgreSQL:
+
+```bash
+cd backend
+. .venv/bin/activate
+set -a && source .env && set +a
+python manage.py migrate
+python manage.py runserver 8001
+```
+
+El backend debe mostrar `Starting development server at
+http://127.0.0.1:8001/`. Comprueba la comunicación abriendo
+<http://localhost:8001/api/v1/auth/csrf/>; debe aparecer un JSON con
+`csrfToken`.
+
+Para usar los usuarios de ejemplo, carga primero el script PostgreSQL descrito
+en el README del backend. Por ejemplo,
+`salzillo_admin@gmail.com` / `Temporal2026.` solo existirá después de cargar
+`backend/scripts/demo_data.sql`.
+
+## Si el inicio de sesión no funciona
+
+1. **`Failed to fetch`, error CORS o "No se pudo conectar":** Django no está
+   activo o la URL exacta de Go Live no aparece en
+   `DJANGO_CORS_ALLOWED_ORIGINS`. Para el puerto habitual usa:
+
+   ```dotenv
+   DJANGO_CORS_ALLOWED_ORIGINS=http://localhost:5500,http://127.0.0.1:5500
+   ```
+
+   Reinicia Django después de editar `.env`.
+2. **HTTP 401:** el backend sí responde, pero el correo/contraseña no coincide o
+   todavía no cargaste los datos de demostración.
+3. **HTTP 403 CSRF:** usa el mismo hostname en ambas URLs (`localhost` con
+   `localhost`, recomendado) y confirma que el origen completo, incluido el
+   puerto, está en CORS/CSRF.
+4. **`ERR_CONNECTION_REFUSED`:** ejecuta `python manage.py runserver 8001`.
+5. **El mapa no aparece:** esto no bloquea el login; revisa por separado
+   `hereApiKey` en `config.js`.
+
+## Pantallas
+
+- `login.html`, `registro.html` y `recuperar.html`: sesión, registro (Planificador/Chofer) y recuperación.
+- `gestion.html`: interfaz adaptable a SuperAdmin, Admin, Planificador y Chofer. El selector "Vista de perfil" permite revisar el ejemplo de permisos; SuperAdmin dispone de modales para empresa/paleta y vinculación de usuarios.
+- `index.html`: planificador HERE, zonas agrupables, unidad, mercancía, carga, salida, asignación de chofer y exportación mediante el diálogo de impresión/PDF del navegador.
+
+## Configuración y API
+
+`window.PLANIFICADOR_CONFIG` centraliza la credencial de HERE. La URL base de la API se configura en despliegue mediante `window.PLANIFICADOR_API_URL`; las llamadas no contienen secretos. Los estilos de empresa sustituyen los tokens CSS en el documento, por lo que toda la interfaz adopta una paleta sin compilar un bundle distinto.
+
+## Verificación manual
 
 ```bash
 python3 -m http.server 8000 --directory frontend
 ```
 
-Abre <http://localhost:8000>.
-
-## Archivos actuales
-
-| Archivo | Responsabilidad |
-| --- | --- |
-| `index.html` | Planificador minimalista y carga de dependencias. |
-| `login.html` | Pantalla de acceso conectada a la API Django. |
-| `assets/css/app.css` | Sistema visual minimalista, layout y componentes. |
-| `assets/css/login.css` | Estilos exclusivos de autenticación. |
-| `assets/js/ui.js` | Interacciones de interfaz, panel móvil y notificaciones. |
-| `assets/js/login.js` | Sesión, CSRF y visibilidad de contraseña. |
-| `assets/js/map.js` | HERE Maps, validación, áreas restringidas y cálculo de rutas. |
-
-La separación por tipo de recurso mantiene el documento HTML libre de estilos y
-lógica inline. Los módulos JavaScript se reparten por responsabilidad para que
-las próximas integraciones no conviertan el mapa en un archivo de interfaz
-generalista.
-
-## Configuración
-
-La implementación heredada contiene la configuración de HERE en
-`assets/js/map.js`.
-Antes de publicar o ampliar la aplicación se debe rotar esa credencial y
-extraerla a configuración de despliegue. No deben añadirse más secretos al
-repositorio.
-
-La futura URL del backend también debe ser configurable por entorno. Durante el
-desarrollo se recomienda servir cada aplicación en su propio puerto y declarar
-los orígenes permitidos en Django.
-
-## Evolución prevista
-
-1. Añadir un manifiesto de dependencias y tareas reproducibles cuando se adopte
-   una herramienta de build.
-2. Extraer la configuración y el cliente de HERE del dominio de rutas.
-3. Crear una capa `services` para consumir `/api/v1/`.
-4. Dividir la interfaz en componentes y páginas solo cuando la complejidad lo
-   justifique.
-5. Incorporar lint, pruebas unitarias y pruebas de navegador al pipeline.
-
-No se debe acoplar esta evolución a plantillas Django: el backend entregará una
-API y el frontend conservará su ciclo de vida independiente.
+Comprueba `login.html`, `registro.html`, `recuperar.html`, las cuatro vistas de perfil en `gestion.html`, los modales, el panel móvil y la impresión de `index.html`.

@@ -31,3 +31,6 @@ coverage/
 .idea/
 .DS_Store
 Thumbs.db
+
+# Configuración local del frontend
+frontend/config.js

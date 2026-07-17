@@ -6,7 +6,7 @@ from .models import User
 class RouteFlowUserCreationForm(UserCreationForm):
     class Meta(UserCreationForm.Meta):
         model = User
-        fields = ("email", "name", "role")
+        fields = ("email", "name", "phone")
 
 
 class RouteFlowUserChangeForm(UserChangeForm):

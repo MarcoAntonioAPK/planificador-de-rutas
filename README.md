@@ -5,9 +5,7 @@ separación sigue el mismo modelo de trabajo de **gym-erp** para las aplicacione
 web: un frontend autónomo y un backend Django autónomo. La aplicación móvil
 queda expresamente fuera del alcance de este repositorio.
 
-> El frontend incluye el planificador y la pantalla de acceso. El backend inicia
-> con el modelo de usuario y los endpoints de sesión; los dominios de rutas se
-> incorporarán de forma incremental.
+> El frontend incluye el planificador y la pantalla de acceso. El backend incluye autenticación, aislamiento multiempresa, flota, zonas restringidas y rutas.
 
 ## Estructura
 
@@ -28,7 +26,8 @@ queda expresamente fuera del alcance de este repositorio.
     ├── AGENTS.md      # Reglas específicas de Django/API
     ├── README.md      # Instalación y contrato de autenticación
     ├── config/        # Configuración Django
-    └── apps/users/    # Modelo de usuario y endpoints de sesión
+    ├── apps/users/    # Usuarios y roles
+    └── apps/operations/ # Empresas, flota, zonas y rutas
 ```
 
 ## Responsabilidades
@@ -78,3 +77,7 @@ documentación y pruebas de integración del consumidor frontend.
 3. Ejecuta las comprobaciones descritas en su README.
 4. Si se modifica el contrato HTTP, actualiza ambos README y sus pruebas.
 5. Entrega un commit autocontenido, sin secretos ni artefactos generados.
+
+## Decisión multiempresa
+
+El contrato `/api/v1/` entrega membresías y paletas por empresa. El frontend aplica esa identidad con variables CSS y el backend impone el aislamiento con `Membership`; ninguna aplicación comparte dependencias o detalles internos.
