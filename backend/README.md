@@ -28,8 +28,9 @@ El frontend se sirve en `http://localhost:8000` y utiliza por defecto la API en
 `http://localhost:8001/api/v1`. En otro entorno se debe definir
 `window.ROUTEFLOW_API_URL` antes de cargar `assets/js/login.js`.
 
-La guía detallada para crear SQLite o PostgreSQL, conectar DBeaver y trabajar
-con migraciones está en [`docs/database.md`](docs/database.md).
+La guía detallada para generar `DJANGO_SECRET_KEY`, conectar PostgreSQL desde
+Django y DBeaver, y trabajar con migraciones está en
+[`docs/database.md`](docs/database.md).
 
 ## Estructura
 

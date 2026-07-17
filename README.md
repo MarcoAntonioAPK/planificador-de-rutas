@@ -50,6 +50,7 @@ Consulta [`frontend/README.md`](frontend/README.md) para ejecutarlo.
 - Encapsulará integraciones sensibles y secretos de proveedores.
 - Usa Django 5.2.7 como versión de compatibilidad con **gym-erp**, fijada en el
   manifiesto del backend para instalaciones reproducibles.
+- Utiliza PostgreSQL como único motor de base de datos soportado.
 
 Consulta [`backend/README.md`](backend/README.md) para el diseño previsto.
 
