@@ -44,7 +44,17 @@
 
     sidebarToggle.addEventListener("click", toggleSidebar);
     document.querySelectorAll("[data-use-location]").forEach((button) => button.addEventListener("click", useCurrentLocation));
-    document.querySelector("#saveRouteBtn").addEventListener("click", () => showToast("La ruta quedará disponible cuando finalice el cálculo."));
+    document.querySelector("#departureAt").value = new Date(Date.now() + 3600000).toISOString().slice(0, 16);
+    document.querySelector("#newTruckBtn").addEventListener("click", () => document.querySelector("#truckDialog").showModal());
+    document.querySelector("#saveZoneBtn").addEventListener("click", () => document.querySelector("#zoneDialog").showModal());
+    document.querySelector("#toggleZonesBtn").addEventListener("click", (event) => {
+        event.currentTarget.classList.toggle("active");
+        showToast(event.currentTarget.classList.contains("active") ? "Mostrando todas las zonas de Chihuahua." : "Zonas guardadas ocultas.");
+    });
+    document.querySelector("#exportPdfBtn").addEventListener("click", () => window.print());
+    document.querySelectorAll("dialog form").forEach((form) => form.addEventListener("submit", (event) => {
+        if (event.submitter?.value === "save") showToast("La información se guardó correctamente.");
+    }));
 
     window.addEventListener("routeflow:toast", ({ detail }) => showToast(detail.message, detail.type));
     window.addEventListener("routeflow:loading", ({ detail }) => setLoading(detail));

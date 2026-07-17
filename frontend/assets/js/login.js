@@ -35,7 +35,7 @@
             const data = await response.json();
             if (!response.ok) throw new Error(data.message || "No se pudo iniciar sesión.");
             setMessage(`Hola, ${data.user.name}. Acceso correcto.`, true);
-            window.setTimeout(() => window.location.assign("index.html"), 700);
+            window.setTimeout(() => window.location.assign("gestion.html"), 700);
         } catch (error) {
             setMessage(error.message === "Failed to fetch" ? "No se pudo conectar con el servidor." : error.message);
         } finally {

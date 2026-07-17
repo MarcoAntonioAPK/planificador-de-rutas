@@ -1,6 +1,6 @@
 # PostgreSQL, configuración y migraciones
 
-RouteFlow utiliza PostgreSQL. DBeaver sirve para conectarse y consultar la base,
+Planificador de rutas utiliza PostgreSQL. DBeaver sirve para conectarse y consultar la base,
 pero no sustituye al servidor PostgreSQL ni configura Django automáticamente.
 
 ## 1. Entender `DJANGO_SECRET_KEY`
@@ -144,7 +144,14 @@ python manage.py migrate
 ```
 
 Actualiza la conexión en DBeaver y abre `Schemas > public > Tables`. Deberás ver
-`users_user`, `django_migrations`, `django_session` y las tablas de permisos.
+`users_user`, `users_role`, `operations_company`, `operations_membership`,
+`operations_trucktype`, las tablas de rutas/zonas y las tablas de Django.
+
+Para cargar las dos empresas y sus datos de demostración después de migrar:
+
+```bash
+psql -h "$DB_HOST" -U "$DB_USER" -d "$DB_NAME" -f scripts/demo_data.sql
+```
 
 ## 8. Crear el administrador y arrancar
 
