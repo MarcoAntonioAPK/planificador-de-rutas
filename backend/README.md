@@ -17,6 +17,16 @@ python manage.py createsuperuser
 python manage.py runserver 8001
 ```
 
+Go Live no ejecuta este proceso. Si el frontend se sirve en el puerto `5500`,
+incluye su origen exacto en `.env` antes de iniciar Django:
+
+```dotenv
+DJANGO_CORS_ALLOWED_ORIGINS=http://localhost:5500,http://127.0.0.1:5500
+FRONTEND_URL=http://localhost:5500
+```
+
+Después de cambiar estas variables, detén y vuelve a iniciar `runserver`.
+
 Nunca guardes `.env`. Para datos de prueba, después de migrar:
 
 ```bash
