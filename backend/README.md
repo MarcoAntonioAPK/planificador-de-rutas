@@ -17,7 +17,8 @@ cd backend
 python3 -m venv .venv
 . .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env  # exporta sus valores con la herramienta del entorno
+cp .env.example .env
+set -a && source .env && set +a
 python manage.py migrate
 python manage.py createsuperuser
 python manage.py runserver 8001
@@ -26,6 +27,10 @@ python manage.py runserver 8001
 El frontend se sirve en `http://localhost:8000` y utiliza por defecto la API en
 `http://localhost:8001/api/v1`. En otro entorno se debe definir
 `window.ROUTEFLOW_API_URL` antes de cargar `assets/js/login.js`.
+
+La guía detallada para generar `DJANGO_SECRET_KEY`, conectar PostgreSQL desde
+Django y DBeaver, y trabajar con migraciones está en
+[`docs/database.md`](docs/database.md).
 
 ## Estructura
 
