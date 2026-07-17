@@ -1,63 +1,62 @@
 # Backend
 
-Espacio reservado para la futura API Django del planificador de rutas. Todavía
-no contiene una aplicación ejecutable ni instala dependencias.
+API Django de RouteFlow. El primer dominio implementado es la autenticación de
+usuarios mediante sesiones seguras y correo electrónico.
 
-## Compatibilidad con gym-erp
+## Versiones
 
-El backend debe empezar con la **misma versión exacta** de Python, Django y
-Django REST Framework usada por gym-erp. Esa información se copiará desde sus
-archivos de dependencias cuando comience la implementación y quedará fijada en
-un manifiesto reproducible. No se declara aquí una versión supuesta porque eso
-podría hacer incompatibles ambos proyectos.
+El manifiesto fija Django `5.2.7`, la versión de compatibilidad tomada como base
+para mantener el backend alineado con gym-erp, y `django-cors-headers 4.7.0`.
+Si gym-erp actualiza su versión, ambos proyectos deben actualizarse juntos y
+pasar sus pruebas antes de desplegarse.
 
-Lista previa al scaffold:
+## Instalación
 
-1. Consultar los archivos de runtime y dependencias de gym-erp.
-2. Fijar las mismas versiones, incluyendo herramientas de formato y pruebas.
-3. Replicar su estrategia de configuración por entornos, sin copiar secretos.
-4. Registrar aquí los comandos reales de instalación, migración y ejecución.
-5. Añadir CI para tests, lint, migraciones pendientes y `check --deploy`.
+```bash
+cd backend
+python3 -m venv .venv
+. .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env  # exporta sus valores con la herramienta del entorno
+python manage.py migrate
+python manage.py createsuperuser
+python manage.py runserver 8001
+```
 
-## Estructura objetivo
+El frontend se sirve en `http://localhost:8000` y utiliza por defecto la API en
+`http://localhost:8001/api/v1`. En otro entorno se debe definir
+`window.ROUTEFLOW_API_URL` antes de cargar `assets/js/login.js`.
 
-La estructura se creará cuando exista el primer caso de uso backend; no se
-mantienen paquetes vacíos:
+## Estructura
 
 ```text
 backend/
+├── config/              # settings, URLs y WSGI
+├── apps/users/          # usuario, administrador y endpoints de sesión
 ├── manage.py
-├── pyproject.toml o requirements/   # Igual que gym-erp
-├── .env.example
-├── config/                          # settings, urls, ASGI y WSGI
-├── apps/
-│   ├── routes/                      # rutas y puntos de paso
-│   └── restricted_areas/            # áreas y restricciones
-└── tests/
+└── requirements.txt
 ```
 
-Los nombres definitivos de las aplicaciones dependerán del dominio validado.
-No se debe crear una aplicación genérica `core` para acumular lógica sin dueño.
+## Autenticación
 
-## API inicial prevista
+El modelo `users.User` usa el correo único como identificador e incorpora nombre
+y rol (`admin`, `planner` o `driver`). `AUTH_USER_MODEL` se configuró desde la
+primera migración para permitir su evolución sin sustituir tablas posteriormente.
 
-El contrato público se publicará bajo `/api/v1/`. Los primeros recursos
-probables son rutas y áreas restringidas, pero sus endpoints no se consideran
-definitivos hasta documentar casos de uso, permisos y esquemas de respuesta.
+| Método | Ruta | Descripción |
+| --- | --- | --- |
+| `GET` | `/api/v1/auth/csrf/` | Entrega el token CSRF y prepara su cookie. |
+| `POST` | `/api/v1/auth/login/` | Abre una sesión con `email` y `password`. |
+| `POST` | `/api/v1/auth/logout/` | Cierra la sesión actual. |
 
-El backend será responsable de:
+Las peticiones de escritura requieren `X-CSRFToken`; las cookies son HTTP-only
+y CORS solo acepta los orígenes indicados en `DJANGO_CORS_ALLOWED_ORIGINS`.
 
-- autenticación y autorización;
-- persistencia de rutas y áreas restringidas;
-- validación de reglas de negocio;
-- protección de claves de proveedores externos;
-- generación asíncrona de documentos o cálculos costosos cuando sea necesario.
+## Comprobaciones
 
-El frontend seguirá siendo una aplicación independiente y nunca importará
-módulos ni plantillas Django.
-
-## Comandos
-
-Los comandos se añadirán junto con el scaffold. Hasta entonces no debe
-presentarse este directorio como un servicio ejecutable.
-
+```bash
+python manage.py makemigrations --check --dry-run
+python manage.py test
+python manage.py check
+python manage.py check --deploy
+```

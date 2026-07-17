@@ -24,9 +24,12 @@ Abre <http://localhost:8000>.
 
 | Archivo | Responsabilidad |
 | --- | --- |
-| `index.html` | Estructura de la pantalla y carga de dependencias. |
-| `assets/css/app.css` | Sistema visual, layout adaptable y componentes. |
+| `index.html` | Planificador minimalista y carga de dependencias. |
+| `login.html` | Pantalla de acceso conectada a la API Django. |
+| `assets/css/app.css` | Sistema visual minimalista, layout y componentes. |
+| `assets/css/login.css` | Estilos exclusivos de autenticación. |
 | `assets/js/ui.js` | Interacciones de interfaz, panel móvil y notificaciones. |
+| `assets/js/login.js` | Sesión, CSRF y visibilidad de contraseña. |
 | `assets/js/map.js` | HERE Maps, validación, áreas restringidas y cálculo de rutas. |
 
 La separación por tipo de recurso mantiene el documento HTML libre de estilos y

@@ -5,9 +5,9 @@ separación sigue el mismo modelo de trabajo de **gym-erp** para las aplicacione
 web: un frontend autónomo y un backend Django autónomo. La aplicación móvil
 queda expresamente fuera del alcance de este repositorio.
 
-> En el estado actual solo está implementado el frontend. `backend/` contiene
-> la documentación y las reglas de trabajo que permitirán incorporarlo sin
-> tener que volver a reorganizar el repositorio.
+> El frontend incluye el planificador y la pantalla de acceso. El backend inicia
+> con el modelo de usuario y los endpoints de sesión; los dominios de rutas se
+> incorporarán de forma incremental.
 
 ## Estructura
 
@@ -26,7 +26,9 @@ queda expresamente fuera del alcance de este repositorio.
 │           └── map.js
 └── backend/           # Espacio preparado para la futura API Django
     ├── AGENTS.md      # Reglas específicas de Django/API
-    └── README.md      # Diseño y plan de incorporación del backend
+    ├── README.md      # Instalación y contrato de autenticación
+    ├── config/        # Configuración Django
+    └── apps/users/    # Modelo de usuario y endpoints de sesión
 ```
 
 ## Responsabilidades
@@ -46,9 +48,8 @@ Consulta [`frontend/README.md`](frontend/README.md) para ejecutarlo.
 - Expondrá una API REST versionada bajo `/api/v1/`.
 - Gestionará autenticación, permisos, persistencia y reglas de negocio.
 - Encapsulará integraciones sensibles y secretos de proveedores.
-- Se creará con la misma versión exacta de Django fijada por **gym-erp** en el
-  momento de iniciar la implementación; no se anticipa una versión para evitar
-  divergencias entre proyectos.
+- Usa Django 5.2.7 como versión de compatibilidad con **gym-erp**, fijada en el
+  manifiesto del backend para instalaciones reproducibles.
 
 Consulta [`backend/README.md`](backend/README.md) para el diseño previsto.
 
